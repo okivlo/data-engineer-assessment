@@ -4,6 +4,7 @@ services:
     platform: linux/amd64
     command:
       - "--default-authentication-plugin=mysql_native_password"
+      - "--character-set-server=utf8mb4"    # Insurance against  the README.
     environment:
       - MYSQL_RANDOM_ROOT_PASSWORD=yes
       - MYSQL_DATABASE=codetest
@@ -11,6 +12,8 @@ services:
       - MYSQL_PASSWORD=swordfish
     ports:
       - "3306:3306"
+    volumes:
+      - ./db/init:/docker-entrypoint-initdb.d:ro    # Initialize schemas in the db folder.
     restart: always
 
   python:
