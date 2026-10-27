@@ -33,6 +33,5 @@ create table employees (
     references departments (id) on delete restrict on update cascade,
   constraint fk_employees_level foreign key (level_id)
     references levels (id) on delete restrict on update cascade,
-  constraint chk_employees_salary check (salary > 0),
-  constraint chk_employees_started_after_birth check (date_started >= date_of_birth)
+  constraint chk_employees_salary check (salary > 0)
 );
