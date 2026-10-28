@@ -24,9 +24,11 @@ services:
 
   etl:
     build: image
-    command: ["python", "etl.py"]
+    command: ["sh", "-c", "python etl.py; cron -f"]    # Run once, then on the schedule in image/crontab.
     volumes:
       - ./data:/data:ro
+      - ./sql:/sql:ro
+      - ./reports:/reports
     depends_on:
       database:
         condition: service_healthy
