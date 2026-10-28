@@ -4,7 +4,7 @@ services:
     platform: linux/amd64
     command:
       - "--default-authentication-plugin=mysql_native_password"
-      - "--character-set-server=utf8mb4"    # Insurance against  the README.
+      - "--character-set-server=utf8mb4"    # Insurance.
     environment:
       - MYSQL_RANDOM_ROOT_PASSWORD=yes
       - MYSQL_DATABASE=codetest
@@ -14,13 +14,21 @@ services:
       - "3306:3306"
     volumes:
       - ./db/init:/docker-entrypoint-initdb.d:ro    # Initialize schemas in the db folder.
+    healthcheck:
+      # Didn't want to do this in the python code, lol. Cleaner to do it here.
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-ucodetest", "-pswordfish"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
     restart: always
 
-  python:
-    image: python
+  etl:
     build: image
-    command: ["./example.py"]
+    command: ["sh", "-c", "python etl.py; cron -f"]    # Run once, then on the schedule in image/crontab.
     volumes:
-      - ./data:/data
+      - ./data:/data:ro
+      - ./sql:/sql:ro
+      - ./reports:/reports
     depends_on:
-      - database
+      database:
+        condition: service_healthy

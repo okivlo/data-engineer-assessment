@@ -202,3 +202,34 @@ To tidy up, bringing down all the containers and deleting them.
 ```
 docker compose down
 ```
+
+### Checking the results
+
+Start everything (this loads, validates and transforms the data). The validation report is written to `reports/validation_report.md`.
+
+```
+docker compose up --build
+```
+
+Then check the tables from the command line with the database container running:
+
+```
+docker compose exec database mysql -ucodetest -pswordfish codetest -e "select * from avg_salary_by_department_level"
+docker compose exec database mysql -ucodetest -pswordfish codetest -e "select * from employee_enriched limit 20"
+docker compose exec database mysql -ucodetest -pswordfish codetest -e "select * from data_quality_issues limit 20"
+```
+
+### Scheduling the ETL
+
+The `etl` container runs the ETL once when it starts, then keeps cron running. The schedule is in `image/crontab` (daily at 02:00); rebuild after changing it.
+
+```
+docker compose logs etl
+docker compose run --rm etl python etl.py
+```
+
+The first shows the log of every run, the second runs the ETL once by hand. To run the tests:
+
+```
+docker compose run --rm etl python -m pytest
+```

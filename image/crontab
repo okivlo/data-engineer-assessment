@@ -1,0 +1,2 @@
+# Daily at 02:00 as root. Output goes to the container log (PID 1 stdout), see docker compose logs etl.
+0 2 * * * root /usr/local/bin/python /app/etl.py >> /proc/1/fd/1 2>&1
