@@ -7,7 +7,7 @@ WORKDIR /app
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY etl.py ./
+COPY etl.py report.py utils.py ./
 RUN chmod +x etl.py
 COPY tests ./tests
 

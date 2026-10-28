@@ -3,8 +3,10 @@
 import csv
 import logging
 import os
-
 import sqlalchemy
+
+import report
+from utils import markdown_table, split_statements
 
 # Normally you'd use a .env file.
 DATABASE_URL = os.environ.get(
@@ -61,11 +63,6 @@ def load(engine):
             log.info("%s: %d rows loaded", table, loaded)
 
 
-def split_statements(sql):
-    sql = "".join(line for line in sql.splitlines(keepends=True) if not line.lstrip().startswith("--"))
-    return [statement.strip() for statement in sql.split(";") if statement.strip()]
-
-
 def run_script(engine, name):
     with open(os.path.join(SQL_DIR, name), encoding="utf-8") as f:
         statements = split_statements(f.read())
@@ -76,13 +73,6 @@ def run_script(engine, name):
             if result.returns_rows:
                 results.append(result.fetchall())
     return results
-
-
-def markdown_table(header, rows):
-    return "\n".join(
-        [f"| {' | '.join(header)} |", "|" + "---|" * len(header)]
-        + [f"| {' | '.join(map(str, row))} |" for row in rows]
-    )
 
 
 if __name__ == "__main__":
@@ -103,3 +93,6 @@ if __name__ == "__main__":
     for script in ("cleaning.sql", "transform.sql"):
         run_script(engine, script)
         log.info("%s done", script)
+
+    report.write(run_script(engine, "analysis.sql"), REPORT_DIR)
+    log.info("analysis report written")
